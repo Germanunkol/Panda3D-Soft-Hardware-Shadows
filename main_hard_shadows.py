@@ -99,8 +99,8 @@ in vec3 normal_viewspace;
 out vec4 out_color;
 
 
-float NEAR = 1;
-float FAR = 500;
+float NEAR = 5;
+float FAR = 100;
 in vec4 shadow_coords;
 
 uniform struct p3d_LightSourceParameters {
@@ -227,14 +227,14 @@ class MyApp(ShowBase):
         # Set up point light that will cast shadows:
         plight = PointLight('plight')
         plight.setColorTemperature( 3600 )
-        plight.setShadowCaster(True, 1024, 1024)
+        plight.setShadowCaster(True, 128, 128)
         plnp = render.attachNewNode(plight)
-        plnp.setPos(0, 0, 5)
+        plnp.setPos(0, 0, 20)
         render.setLight(plnp)
 
         for i in range(6):
-            plight.getLens(i).setNear(1)
-            plight.getLens(i).setFar(500)
+            plight.getLens(i).setNear(5)
+            plight.getLens(i).setFar(100)
 
         # Let environment receive shadows:
         self.init_shaders()
