@@ -39,12 +39,11 @@ class MyApp(ShowBase):
 
         # Let environment receive shadows:
         self.init_shaders()
-        self.fix_texture_filter_mode()
-
         self.accept("v", base.bufferViewer.toggleEnable)
-        self.accept("t", self.fix_texture_filter_mode)
 
-        self.sampler_mode = 2
+        self.filter_mode = "LINEAR"
+        
+        taskMgr.doMethodLater(1, self.toggle_texture_filter_mode, 'toggle filter mode')
 
     def init_shaders(self):
 
@@ -56,40 +55,30 @@ class MyApp(ShowBase):
         #self.scene.ls()
 
 
-    def fix_texture_filter_mode(self):
+    def toggle_texture_filter_mode(self, task):
         # Try to fix Filter mode for texture:
         sBuffer = self.plight.getShadowBuffer( GraphicsStateGuardianBase.getGsg(0) )
         if sBuffer is not None:
             tex = sBuffer.getTexture()
-            print(tex)
+            print("Texture settings (before):", tex)
 
             state = tex.default_sampler
             # Create mutable copy:
             state = SamplerState( state )
-            if self.sampler_mode == 0:
-                print("NEAREST")
-                state.setMinfilter( SamplerState.FT_nearest )
-                state.setMagfilter( SamplerState.FT_nearest )
-            elif self.sampler_mode == 1:
-                print("LINEAR")
+            print(self.filter_mode)
+            if self.filter_mode == "SHADOW":
                 state.setMinfilter( SamplerState.FT_linear )
                 state.setMagfilter( SamplerState.FT_linear )
-            elif self.sampler_mode == 2:
-                print("SHADOW")
+                self.filter_mode = "LINEAR"
+            else:
                 state.setMinfilter( SamplerState.FT_shadow )
                 state.setMagfilter( SamplerState.FT_shadow )
-            elif self.sampler_mode == 3:
-                print("DEFAULT")
-                state.setMinfilter( SamplerState.FT_default )
-                state.setMagfilter( SamplerState.FT_default )
-            self.sampler_mode += 1
-            self.sampler_mode %= 4
+                self.filter_mode = "SHADOW"
             tex.setDefaultSampler( state )
-            print(tex)
-            print(tex.getEffectiveMinfilter())
-            print(tex.getEffectiveMagfilter())
-
-        print(base.cam.getPos(render))
+            print("Texture settings (after):", tex)
+            print("EffectiveMinFilter:", tex.getEffectiveMinfilter())
+            print("EffectiveMagFilter:", tex.getEffectiveMagfilter())
+        return task.again
 
 
 
